@@ -1,98 +1,118 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function Index() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  const onRegister = () => {
+    router.push({
+      pathname: "/register",
+    });
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  const handleLogin = () => {
+    if (email.trim() === "" || password.trim() === "") {
+      Alert.alert("Error", "Todos los campos son obligatorios.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Error", "El correo electrónico no es válido.");
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert("Error", "La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      Alert.alert("Error", "Incluye al menos una letra mayúscula :v.");
+      return;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      Alert.alert("Error", "Incluye al menos una letra minúscula.");
+      return;
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      Alert.alert("Error", "Incluye al menos un carácter especial.");
+      return;
+    }
+
+    Alert.alert("Éxito", "Iniciando sesión.");
+    setEmail("");
+    setPassword("");
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <Image
+        source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
+        style={styles.image}
+      />
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <Text style={styles.label}>Correo electrónico</Text>
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <Text style={styles.label}>Contraseña</Text>
+      <TextInput
+        style={styles.input}
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Contraseña"
+        secureTextEntry={true}
+      />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <View style={styles.buttonContainer}>
+        <Button title="Ingresar" onPress={handleLogin} color="#841584" />
+      </View>
+      <Button title="Registro" onPress={onRegister}/>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  image: {
+    width: 120,
+    height: 120,
+    marginBottom: 30,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  label: {
+    width: "100%",
+    fontSize: 14,
+    marginBottom: 5,
+    fontWeight: "600",
   },
-  title: {
-    textAlign: 'center',
+  input: {
+    width: "100%",
+    height: 45,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    marginBottom: 15,
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  buttonContainer: {
+    width: "50%",
+    marginTop: 10,
   },
 });
